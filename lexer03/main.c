@@ -11,13 +11,17 @@ typedef enum {
     TK_SLASH,    
     TK_POWER,    
     TK_INTEGER,  
+    TK_FLOAT,    
     TK_EOF,      
     TK_INVALID   
 } TokenKind;
 
 typedef struct {
     TokenKind kind;  
-    int value;        
+    union {
+        int int_value;       
+        float float_value;  
+    };
 } Token;
 
 char buffer[BUFFER_SIZE];
@@ -49,9 +53,21 @@ Token get_next_token(FILE *fp) {
         while (isdigit(c = fgetc(fp))) {
             value = value * 10 + (c - '0');
         }
-        ungetc(c, fp);
-        token.kind = TK_INTEGER;
-        token.value = value;
+        if (c == '.') {
+            float float_value = value;
+            float divisor = 10.0;
+            while (isdigit(c = fgetc(fp))) {
+                float_value = float_value + (c - '0') / divisor;
+                divisor *= 10.0;
+            }
+            ungetc(c, fp);
+            token.kind = TK_FLOAT;
+            token.float_value = float_value;
+        } else {
+            ungetc(c, fp);
+            token.kind = TK_INTEGER;
+            token.int_value = value;
+        }
     } else if (c == EOF) {
         token.kind = TK_EOF;
     } else {
@@ -93,7 +109,10 @@ int main(int argc, char *argv[]) {
                 printf("POWER\n");
                 break;
             case TK_INTEGER:
-                printf("INTEGER(%d)\n", token.value);
+                printf("INTEGER(%d)\n", token.int_value);
+                break;
+            case TK_FLOAT:
+                printf("FLOAT(%f)\n", token.float_value);
                 break;
             case TK_EOF:
                 printf("EOF\n");
@@ -103,7 +122,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
     } while (token.kind != TK_EOF);
-
-    fclose(fp);
-    return 0;
+fclose(fp);
+return 0;
 }
+
