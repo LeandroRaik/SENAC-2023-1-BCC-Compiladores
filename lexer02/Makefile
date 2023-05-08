@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -std=c99
 
-lexer: lexer.c
+build: lexer.c
 	$(CC) $(CFLAGS) -o lexer lexer.c
 
 .PHONY: clean

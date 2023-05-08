@@ -4,7 +4,7 @@ EXEC = main
 SRC = main.c
 INPUT = input.txt
 
-all: $(EXEC)
+build: $(EXEC)
 
 $(EXEC): $(SRC)
 	$(CC) $(CFLAGS) -o $(EXEC) $(SRC)
